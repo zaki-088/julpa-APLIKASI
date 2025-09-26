@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esport Jersey Store</title>
+
+    <style>
+        /* Pengaturan Dasar Body */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        /* Header dan Navigasi */
+        header {
+            background-color: #1f1f1f;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #00aaff;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00aaff;
+        }
+
+        nav a {
+            color: #e0e0e0;
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-weight: 500;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        nav a:hover {
+            color: #00aaff;
+        }
+        
+        #cart-count {
+            background-color: #ff4d4d;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 8px;
+            font-size: 0.8rem;
+            vertical-align: top;
+            margin-left: 4px;
+        }
+
+        /* Konten Utama */
+        main {
+            padding: 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 16px rgba(0, 170, 255, 0.3);
+        }
+
+        .card img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .card-content h3 {
+            margin-top: 0;
+            font-size: 1.4rem;
+        }
+        
+        .card-content .price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #00aaff;
+            margin-bottom: 1rem;
+        }
+
+        .buy-button {
+            display: block;
+            width: 100%;
+            padding: 0.8rem;
+            background-color: #00aaff;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .buy-button:hover {
+            background-color: #0088cc;
+        }
+
+        /* === [BARU] Modal untuk Keranjang & Pesanan === */
+        .modal {
+            display: none; 
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+            animation: fadeIn 0.5s;
+        }
+
+        .modal-content {
+            background-color: #2a2a2a;
+            margin: 10% auto;
+            padding: 25px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .modal-content h2 {
+            border-bottom: 2px solid #00aaff;
+            padding-bottom: 10px;
+        }
+        
+        #cart-items li, #order-list li {
+            list-style: none;
+            padding: 10px;
+            border-bottom: 1px solid #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        #cart-total, .order-total {
+            text-align: right;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        
+        #checkout-button {
+            margin-top: 20px;
+            width: 100%;
+            background-color: #28a745; /* Warna hijau untuk checkout */
+        }
+        #checkout-button:hover {
+            background-color: #218838;
+        }
+
+
+        /* === [BARU] Notifikasi Keren === */
+        #notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%); /* Posisi di tengah bawah */
+            opacity: 0;
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 16px;
+            z-index: 3000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            transition: opacity 0.5s, visibility 0.5s, transform 0.5s;
+        }
+        
+        #notification.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-20px); /* Efek muncul ke atas */
+        }
+        
+        @keyframes fadeIn {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 2rem;
+            background-color: #1f1f1f;
+            border-top: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">JUAL T-SHIRT ESPORT</div>
+        <nav>
+            <a href="#">Home</a>
+            <a href="#">Products</a>
+            <a id="cart-link">Keranjang<span id="cart-count">0</span></a>
+            <a id="orders-link">Pesanan</a>
+            <a href="#">About</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1>Official Mobile Legends Jersey</h1>
+            <p>Get the latest jersey from your favorite pro teams!</p>
+        </section>
+
+        <section class="product-gallery">
+            <div class="product-grid">
+                <div class="card">
+                    <img src="https://down-ph.img.susercontent.com/file/sg-11134201-7rbn2-m5wjblrdahs02b" alt="RRQ Jersey">
+                    <div class="card-content">
+                        <h3>RRQ Kingdom Jersey 2025</h3>
+                        <p class="price">Rp 900.000</p>
+                        <button class="buy-button" onclick="buyItem('RRQ Kingdom Jersey 2025', 900000)">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <img src="https://down-id.img.susercontent.com/file/id-11134207-7rash-m0ssctmvc312f6" alt="ONIC Jersey">
+                    <div class="card-content">
+                        <h3>ONIC Esports Jersey 2025</h3>
+                        <p class="price">Rp 1.000.000</p>
+                        <button class="buy-button" onclick="buyItem('ONIC Esports Jersey 2025', 1000000)">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <img src="https://down-id.img.susercontent.com/file/id-11134207-7rbk5-m6htj4rps33b98" alt="EVOS Jersey">
+                    <div class="card-content">
+                        <h3>EVOS Legends Jersey 2025</h3>
+                        <p class="price">Rp 900.000</p>
+                        <button class="buy-button" onclick="buyItem('EVOS Legends Jersey 2025', 900000)">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <img src="https://down-id.img.susercontent.com/file/id-11134207-7rasd-m5qto5mx2ljx34" alt="BTR Vitality Jersey">
+                    <div class="card-content">
+                        <h3>BTR Vitality Jersey 2025</h3>
+                        <p class="price">Rp 800.000</p>
+                        <button class="buy-button" onclick="buyItem('BTR Vitality Jersey 2025', 800000)">Add to Cart</button>
+                    </div>
+                </div>
+                </div>
+        </section>
+    </main>
+    
+    <div id="notification"></div>
+    
+    <div id="cart-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="close-cart">&times;</span>
+            <h2>Keranjang Belanja</h2>
+            <ul id="cart-items"></ul>
+            <div id="cart-total">Total: Rp 0</div>
+            <button id="checkout-button" class="buy-button">Checkout Sekarang</button>
+        </div>
+    </div>
+    
+    <div id="orders-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="close-orders">&times;</span>
+            <h2>Riwayat Pesanan</h2>
+            <ul id="order-list"></ul>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 JUAL T-SHIRT ESPORT. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        // Data disimpan di variabel. Data akan hilang saat halaman direfresh.
+        let cart = [];
+        let orders = [];
+
+        // [BARU] Fungsi Notifikasi Keren
+        function showNotification(message, isSuccess = true) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.backgroundColor = isSuccess ? '#28a745' : '#dc3545'; // Hijau untuk sukses, merah untuk error
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // [DIUBAH] Fungsi untuk menambahkan item ke keranjang
+        function buyItem(itemName, itemPrice) {
+            const existingItem = cart.find(item => item.name === itemName);
+            
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                cart.push({ name: itemName, price: itemPrice, quantity: 1 });
+            }
+            
+            updateCartUI();
+            showNotification(`✅ ${itemName} ditambahkan ke keranjang!`);
+        }
+        
+        // [BARU] Fungsi untuk memperbarui tampilan UI
+        function updateCartUI() {
+            const cartItemsEl = document.getElementById('cart-items');
+            const cartTotalEl = document.getElementById('cart-total');
+            const cartCountEl = document.getElementById('cart-count');
+            
+            cartItemsEl.innerHTML = '';
+            let total = 0;
+            let totalItems = 0;
+            
+            if (cart.length === 0) {
+                cartItemsEl.innerHTML = '<li>Keranjang Anda masih kosong.</li>';
+            } else {
+                cart.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <span>${item.name} (x${item.quantity})</span>
+                        <span>Rp ${(item.price * item.quantity).toLocaleString('id-ID')}</span>
+                    `;
+                    cartItemsEl.appendChild(li);
+                    total += item.price * item.quantity;
+                    totalItems += item.quantity;
+                });
+            }
+
+            cartTotalEl.textContent = `Total: Rp ${total.toLocaleString('id-ID')}`;
+            cartCountEl.textContent = totalItems;
+        }
+        
+        function updateOrdersUI() {
+            const orderListEl = document.getElementById('order-list');
+            orderListEl.innerHTML = '';
+
+            if (orders.length === 0) {
+                 orderListEl.innerHTML = '<li>Anda belum pernah melakukan pesanan.</li>';
+            } else {
+                orders.forEach(order => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <div>
+                            <strong>Order #${order.id}</strong><br>
+                            <small>${order.date}</small>
+                        </div>
+                        <div class="order-total">Rp ${order.total.toLocaleString('id-ID')}</div>
+                    `;
+                    orderListEl.appendChild(li);
+                });
+            }
+        }
+
+        // Event Listeners untuk semua interaksi
+        document.addEventListener('DOMContentLoaded', () => {
+            const cartModal = document.getElementById('cart-modal');
+            const ordersModal = document.getElementById('orders-modal');
+            
+            document.getElementById('cart-link').onclick = () => { cartModal.style.display = 'block'; updateCartUI(); };
+            document.getElementById('orders-link').onclick = () => { ordersModal.style.display = 'block'; updateOrdersUI(); };
+            
+            document.getElementById('close-cart').onclick = () => cartModal.style.display = 'none';
+            document.getElementById('close-orders').onclick = () => ordersModal.style.display = 'none';
+            
+            window.onclick = (event) => {
+                if (event.target == cartModal) cartModal.style.display = 'none';
+                if (event.target == ordersModal) ordersModal.style.display = 'none';
+            };
+            
+            // [BARU] Logika Tombol Checkout
+            document.getElementById('checkout-button').onclick = () => {
+                if (cart.length === 0) {
+                    showNotification('⚠️ Keranjang Anda kosong!', false);
+                    return;
+                }
+                
+                const newOrder = {
+                    id: Date.now(),
+                    items: [...cart],
+                    total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+                    date: new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' })
+                };
+                orders.push(newOrder);
+                
+                cart = [];
+                
+                updateCartUI();
+                cartModal.style.display = 'none';
+                
+                showNotification('🎉 Checkout berhasil! Pesanan Anda telah dibuat.');
+            };
+        });
+    </script>
+</body>
+</html>
